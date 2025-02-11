@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  wordpress:
+    build: .
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: exampleuser
+      WORDPRESS_DB_PASSWORD: examplepass
+      WORDPRESS_DB_NAME: exampledb
+    volumes:
+      - wordpress:/var/www/html
+      - ./jotinha:/var/www/html/wp-content/themes/jotinha
+      - ./bootstrap.sh:/var/www/html/bootstrap.sh
+    depends_on:
+      - db
+    entrypoint: ["/bin/bash", "-c", "chmod +x /var/www/html/bootstrap.sh && /var/www/html/bootstrap.sh && docker-entrypoint.sh apache2-foreground"]
+
+
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: exampledb
+      MYSQL_USER: exampleuser
+      MYSQL_PASSWORD: examplepass
+      MYSQL_ROOT_PASSWORD: jotinha
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - db:/var/lib/mysql
+
+volumes:
+  wordpress:
+  db:
